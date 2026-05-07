@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Results</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-image: url('bamboo-background.jpg');
+            background-color: #f0f2f5;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 620px;
+        }
+
+        h2 {
+            color: #1a202c;
+            font-size: 1.6rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 15px;
+        }
+
+        .result-group {
+            margin-bottom: 20px;
+            color: #2d3748;
+            line-height: 1.8;
+        }
+
+        .result-group b {
+            color: #1a202c;
+        }
+
+        .design-image {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            margin-top: 18px;
+            display: block;
+        }
+
+        .message {
+            padding: 18px;
+            border-radius: 12px;
+            background-color: #fff5f5;
+            border: 1px solid #fde2e2;
+            color: #c53030;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 22px;
+            background-color: #e53e3e;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: background 0.2s ease;
+        }
+
+        .back-button:hover {
+            background-color: #c53030;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>Generated Design Results</h2>
+    <div id="content"></div>
+    <a class="back-button" href="index.html">Back to Input</a>
+</div>
+
+<script>
+function getQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        temp: parseFloat(params.get('temp')),
+        rainfall: parseFloat(params.get('rainfall')),
+        windSpeed: parseFloat(params.get('windSpeed')),
+        refugeeCount: parseInt(params.get('refugeeCount'), 10)
+    };
+}
+
+function getDesignResult({ temp, rainfall, windSpeed, refugeeCount }) {
+    const result = {};
+
+    if (temp >= 16 && temp <= 20) {
+        result.spacing = '1.5m';
+        result.roof_material = 'corrugated iron sheet and bamboo ceiling';
+        result.wall_material = 'bamboo and mesh paneling';
+        result.foundation = 'reinforced concrete footing';
+    } else if (temp > 20) {
+        result.spacing = '1.7m';
+        result.roof_material = 'plastic';
+        result.wall_material = 'ventilated bamboo panels';
+        result.foundation = 'raised bamboo pile foundation';
+    } else {
+        result.spacing = '1.3m';
+        result.roof_material = 'corrugated iron sheet and bamboo ceiling';
+        result.wall_material = 'insulated bamboo panels';
+        result.foundation = 'reinforced concrete footing';
+    }
+
+    if (rainfall >= 150) {
+        result.roof_height = '> 1.5m';
+        result.foundation_depth = '>= 0.6m';
+    } else {
+        result.roof_height = '1m';
+        result.foundation_depth = '>= 0.3m';
+    }
+
+    if (temp > 20 && rainfall >= 150) {
+        result.building_type = 'G+0';
+    } else {
+        result.building_type = 'G+1';
+    }
+
+    result.modules = Math.ceil(refugeeCount / 5);
+    result.cost = result.modules * 6000;
+
+    const tempKey = temp < 16 ? 'low' : temp <= 20 ? 'medium' : 'high';
+    const rainKey = rainfall < 150 ? 'low' : 'high';
+    const windKey = windSpeed > 20 ? 'high' : 'low';
+    const designKey = `${tempKey}_${rainKey}_${windKey}`;
+
+    const imageMap = {
+        'low_low_low': 'images/design_1.jpg',
+        'low_low_high': 'images/design_2.jpg',
+        'low_high_low': 'images/design_3.jpg',
+        'low_high_high': 'images/design_4.jpg',
+        'medium_low_low': 'images/design_5.jpg',
+        'medium_low_high': 'images/design_6.jpg',
+        'medium_high_low': 'images/design_7.jpg',
+        'medium_high_high': 'images/design_8.jpg',
+        'high_low_low': 'images/design_9.jpg',
+        'high_low_high': 'images/design_10.jpg',
+        'high_high_low': 'images/design_11.jpg',
+        'high_high_high': 'images/design_12.jpg'
+    };
+
+    result.imageSrc = imageMap[designKey] || 'images/default-design.jpg';
+    return result;
+}
+
+function renderResult() {
+    const content = document.getElementById('content');
+    const params = getQueryParams();
+
+    if (isNaN(params.temp) || isNaN(params.rainfall) || isNaN(params.windSpeed) || isNaN(params.refugeeCount)) {
+        content.innerHTML = '<div class="message">Missing inputs or invalid values. Please return and fill in all fields.</div>';
+        return;
+    }
+
+    const result = getDesignResult(params);
+    content.innerHTML = `
+        <div class="result-group">
+            <b>Building Type:</b> ${result.building_type}<br>
+            <b>Module Spacing:</b> ${result.spacing}<br>
+            <b>Roof Material:</b> ${result.roof_material}<br>
+            <b>Wall Material:</b> ${result.wall_material}<br>
+            <b>Roof Height:</b> ${result.roof_height}<br>
+            <b>Foundation:</b> ${result.foundation}<br>
+            <b>Foundation Depth:</b> ${result.foundation_depth}<br>
+            <b>Housing modules needed:</b> ${result.modules} <small>(25 m² per module, 5 persons per module)</small><br>
+            <b>Total Cost:</b> ${result.cost} ETB
+        </div>
+        <img src="${result.imageSrc}" alt="Design image" class="design-image">
+    `;
+}
+
+renderResult();
+</script>
+</body>
+</html>

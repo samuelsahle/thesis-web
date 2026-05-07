@@ -13,6 +13,7 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            background-attachment: fixed;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -152,86 +153,22 @@ function designResponse() {
     let rainfall = parseFloat(document.getElementById("rainfallInput").value);
     let windSpeed = parseFloat(document.getElementById("windInput").value);
     let refugeeCount = parseInt(document.getElementById("refugeeInput").value, 10);
-    
-    let result = {};
     let resultDiv = document.getElementById("result");
-    // Check for empty inputs
+
     if (isNaN(temp) || isNaN(rainfall) || isNaN(windSpeed) || isNaN(refugeeCount)) {
         resultDiv.style.display = "block";
         resultDiv.innerHTML = "<span style='color: #c53030;'>Please fill in all fields.</span>";
         return;
     }
 
-    // Spacing and roof material based on temperature
-    if (temp >= 16 && temp <= 20) {
-        result.spacing = "1.5m";
-        result.roof_material = "corrugated iron sheet and bamboo ceiling";
-    } else if (temp > 20) {
-        result.spacing = "1.7m";
-        result.roof_material = "plastic";
-    } else {
-        result.spacing = "1.3m";
-        result.roof_material = "corrugated iron sheet and bamboo ceiling";
-    }
+    const params = new URLSearchParams({
+        temp: temp.toString(),
+        rainfall: rainfall.toString(),
+        windSpeed: windSpeed.toString(),
+        refugeeCount: refugeeCount.toString()
+    });
 
-    // Roof height and foundation depth based on rainfall
-    if (rainfall >= 150) {
-        result.roof_height = "> 1.5m";
-        result.foundation_depth = ">= 0.6m";
-    } else {
-        result.roof_height = "1m";
-        result.foundation_depth = ">= 0.3m";
-    }
-
-    // Building type based on temperature and rainfall
-    if (temp > 20 && rainfall >= 150) {
-        result.building_type = "G+0";
-    } else {
-        result.building_type = "G+1";
-    }
-
-    let modules = Math.ceil(refugeeCount / 5);
-    let cost = modules * 6000;
-
-    // Build a simple key for the image map
-    let tempKey = temp < 16 ? "low" : temp <= 20 ? "medium" : "high";
-    let rainKey = rainfall < 150 ? "low" : "high";
-    let windKey = windSpeed > 20 ? "high" : "low";
-    let designKey = `${tempKey}_${rainKey}_${windKey}`;
-
-    const imageMap = {
-        "low_low_low": "images/design_1.jpg",
-        "low_low_high": "images/design_2.jpg",
-        "low_high_low": "images/design_3.jpg",
-        "low_high_high": "images/design_4.jpg",
-        "medium_low_low": "images/design_5.jpg",
-        "medium_low_high": "images/design_6.jpg",
-        "medium_high_low": "images/design_7.jpg",
-        "medium_high_high": "images/design_8.jpg",
-        "high_low_low": "images/design_9.jpg",
-        "high_low_high": "images/design_10.jpg",
-        "high_high_low": "images/design_11.jpg",
-        "high_high_high": "images/design_12.jpg"
-    };
-
-    let imageSrc = imageMap[designKey] || "images/default-design.jpg";
-
-    // Update UI
-    resultDiv.style.display = "block";
-    resultDiv.innerHTML = `
-        <span class="result-header">Design Specifications:</span>
-        &bull; <b>Building Type:</b> ${result.building_type}<br>
-        &bull; <b>Module Spacing:</b> ${result.spacing}<br>
-        &bull; <b>Roof Material:</b> ${result.roof_material}<br>
-        &bull; <b>Roof Height:</b> ${result.roof_height}<br>
-        &bull; <b>Wall Material:</b> ${result.wall_material}<br>
-        &bull; <b>Foundation:</b> ${result.foundation}<br>
-        &bull; <b>Foundation Depth:</b> ${result.foundation_depth}<br><br>
-        <b>Housing modules needed:</b> ${modules} 
-        <small>(25 m² per module, 5 persons per module)</small><br>
-        <b>Total Cost:</b> ${cost} ETB
-        <img src="${imageSrc}" alt="Design image" class="design-image">
-    `;
+    window.location.href = `results.html?${params.toString()}`;
 }
 </script>
 
